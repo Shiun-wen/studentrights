@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生權利救濟演變史 - 互動遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', '微軟雅黑', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .game-board {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff6b6b, #4ecdc4, #45b7d1);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin: 40px 0;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .timeline-item.completed {
+            opacity: 1;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            width: 45%;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-left: 55%;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-right: 55%;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: #ddd;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item.active .timeline-marker {
+            background: #ff6b6b;
+            transform: translateX(-50%) scale(1.5);
+        }
+
+        .timeline-item.completed .timeline-marker {
+            background: #4ecdc4;
+        }
+
+        .scenario-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .question-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .choice-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .choice-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .choice-btn.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .choice-btn.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-board {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .game-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-over {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            display: none;
+        }
+
+        .score-history {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-entry:last-child {
+            border-bottom: none;
+        }
+
+        .score-medal {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .choices {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-content {
+                width: 80%;
+                margin-left: 20% !important;
+                margin-right: 0 !important;
+            }
+            
+            .timeline::before {
+                left: 10%;
+            }
+            
+            .timeline-marker {
+                left: 10%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ 學生權利救濟演變史</h1>
+            <p>透過互動遊戲了解大法官釋字第382、684、784號解釋</p>
+        </div>
+
+        <div class="score-board">
+            <h3>🎯 遊戲進度</h3>
+            <p>分數: <span id="score">0</span>/100 | 關卡: <span id="level">1</span>/6</p>
+        </div>
+
+        <div class="game-board">
+            <div class="timeline" id="timeline">
+                <div class="timeline-item active" data-level="1">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>📚 特別權力關係時代</h3>
+                        <p>1995年以前，學生被視為特別權力關係中的弱勢方</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-level="2">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>🔓 釋字第382號 (1995)</h3>
+                        <p>破冰與侷限：開啟退學處分救濟之門</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-level="3">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>🎓 釋字第684號 (2011)</h3>
+                        <p>過渡與分歧：大學生專屬擴張</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-level="4">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>🌟 釋字第784號 (2019)</h3>
+                        <p>全面解禁：各級學校學生權利大解放</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-level="5">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>⚖️ 實務應用</h3>
+                        <p>案例分析與判斷標準</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item" data-level="6">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>🏆 綜合測驗</h3>
+                        <p>測試你的學習成果</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-content">
+                <!-- 遊戲內容將動態載入 -->
+            </div>
+
+            <div class="game-controls">
+                <button class="control-btn" onclick="startGame()">開始遊戲</button>
+                <button class="control-btn" onclick="resetGame()">重新開始</button>
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>🎉 恭喜完成遊戲！</h2>
+            <p>你對學生權利救濟的演變有了深入了解</p>
+            <div id="finalScore"></div>
+            
+            <div class="score-history" id="scoreHistory">
+                <h3>📊 歷史成績</h3>
+                <div id="scoreList"></div>
+                <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+                    <span id="bestScore"></span> | <span id="averageScore"></span> | 總遊戲次數: <span id="gameCount"></span>
+                </div>
+            </div>
+            
+            <button class="control-btn" onclick="resetGame()">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let score = 0;
+        let gameStarted = false;
+        let scoreHistory = [];
+
+        // 載入歷史分數
+        function loadScoreHistory() {
+            const saved = localStorage.getItem('constitutionGameScores');
+            if (saved) {
+                try {
+                    scoreHistory = JSON.parse(saved);
+                } catch (e) {
+                    scoreHistory = [];
+                }
+            }
+        }
+
+        // 儲存分數到歷史記錄
+        function saveScore(score) {
+            const now = new Date();
+            const scoreEntry = {
+                score: score,
+                date: now.toLocaleDateString('zh-TW'),
+                time: now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            scoreHistory.unshift(scoreEntry); // 新分數加到開頭
+            
+            // 只保留最近10次記錄
+            if (scoreHistory.length > 10) {
+                scoreHistory = scoreHistory.slice(0, 10);
+            }
+            
+            localStorage.setItem('constitutionGameScores', JSON.stringify(scoreHistory));
+        }
+
+        // 獲取分數統計
+        function getScoreStats() {
+            if (scoreHistory.length === 0) {
+                return { best: 0, average: 0, count: 0 };
+            }
+            
+            const scores = scoreHistory.map(entry => entry.score);
+            const best = Math.max(...scores);
+            const average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+            
+            return { best, average, count: scoreHistory.length };
+        }
+
+        // 獲取成績等級和獎章
+        function getGradeInfo(score) {
+            if (score === 100) return { grade: '🏆 完美達人', medal: '🏆' };
+            if (score >= 85) return { grade: '⭐ 法律達人', medal: '⭐' };
+            if (score >= 70) return { grade: '📚 憲法通', medal: '📚' };
+            if (score >= 50) return { grade: '💪 努力學習中', medal: '💪' };
+            return { grade: '🌱 繼續加油', medal: '🌱' };
+        }
+
+        const gameData = {
+            1: {
+                title: "特別權力關係時代",
+                scenario: "🏫 1990年代的校園：小明因為上課講話被老師記過，他想要申訴這個處分...",
+                question: "在傳統的特別權力關係下，小明可以怎麼做？",
+                choices: [
+                    "向法院提起行政訴訟",
+                    "只能接受處分，無法救濟",
+                    "向教育部申訴",
+                    "找家長協調"
+                ],
+                correct: 1,
+                explanation: "在特別權力關係理論下，學生對學校的管理措施原則上無法提起司法救濟，只能透過校內途徑或接受處分。"
+            },
+            2: {
+                title: "釋字第382號解釋 (1995)",
+                scenario: "📜 大法官首次鬆動特別權力關係！學生阿華因為打架被學校勒令退學，他不服這個決定...",
+                question: "根據釋字第382號解釋，阿華是否可以提起行政訴訟？",
+                choices: [
+                    "可以，因為退學影響受教育權",
+                    "不可以，仍屬校內事務",
+                    "只有大學生才可以",
+                    "要看學校同不同意"
+                ],
+                correct: 0,
+                explanation: "釋字第382號首次確立：對於退學或類此處分，因其對受教育權有重大影響，學生可以提起行政訴訟。"
+            },
+            3: {
+                title: "釋字第684號解釋 (2011)",
+                scenario: "🎓 大學生小美因為選課被拒絕，她認為這侵害了她的學習權，但這不是退學處分...",
+                question: "根據釋字第684號解釋，小美是否可以提起訴訟？",
+                choices: [
+                    "不可以，因為不是退學處分",
+                    "可以，但僅限大學生",
+                    "所有學生都可以",
+                    "要先經過校內申訴"
+                ],
+                correct: 1,
+                explanation: "釋字第684號擴大大學生的救濟範圍，不再限於退學處分，但保障僅限於大學生。"
+            },
+            4: {
+                title: "釋字第784號解釋 (2019)",
+                scenario: "🌈 歷史性突破！國中生小傑因為病假補考成績被打折，高中生小美因為叼含香菸被記過...",
+                question: "根據釋字第784號解釋，他們的情況如何？",
+                choices: [
+                    "都不能提起訴訟",
+                    "只有高中生可以",
+                    "都可能可以提起訴訟",
+                    "要看處分輕重"
+                ],
+                correct: 2,
+                explanation: "釋字第784號全面開放各級學校學生的訴訟權，只要權利受侵害且非顯然輕微之干預，即可救濟。"
+            },
+            5: {
+                title: "實務應用：顯然輕微之干預",
+                scenario: "⚖️ 小強三次未參加升旗被記三次警告，他提起訴訟。法院必須判斷這是否構成權利侵害...",
+                question: "法院可能如何認定？",
+                choices: [
+                    "一定勝訴，因為侵害自由",
+                    "可能敗訴，屬顯然輕微干預",
+                    "自動勝訴，不用審理",
+                    "轉回校內申訴"
+                ],
+                correct: 1,
+                explanation: "法院需綜合考量措施的目的、性質及干預程度。記警告且可銷過，可能被認定為顯然輕微之干預。"
+            },
+            6: {
+                title: "綜合測驗",
+                scenario: "🏆 最終挑戰：釋字第784號解釋的核心精神是什麼？",
+                question: "這三號解釋的演變體現了什麼憲法原則？",
+                choices: [
+                    "教育專業原則",
+                    "有權利即有救濟原則",
+                    "特別權力關係原則",
+                    "學校自治原則"
+                ],
+                correct: 1,
+                explanation: "這三號解釋的演變完美體現了憲法第16條『有權利即有救濟』的核心原則，從限制到全面保障學生訴訟權。"
+            }
+        };
+
+        function startGame() {
+            gameStarted = true;
+            currentLevel = 1;
+            score = 0;
+            updateDisplay();
+            loadLevel(currentLevel);
+        }
+
+        function loadLevel(level) {
+            const data = gameData[level];
+            const content = document.getElementById('game-content');
+            
+            content.innerHTML = `
+                <div class="scenario-card">
+                    <h3>${data.title}</h3>
+                    <p>${data.scenario}</p>
+                </div>
+                
+                <div class="question-section">
+                    <h4>❓ ${data.question}</h4>
+                    <div class="choices" id="choices">
+                        ${data.choices.map((choice, index) => 
+                            `<button class="choice-btn" onclick="selectChoice(${index})">${choice}</button>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <button class="next-btn" id="nextBtn" onclick="nextLevel()">下一關 →</button>
+                </div>
+            `;
+            
+            updateTimeline();
+        }
+
+        function selectChoice(selectedIndex) {
+            const data = gameData[currentLevel];
+            const choices = document.querySelectorAll('.choice-btn');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // 禁用所有選項
+            choices.forEach(btn => btn.style.pointerEvents = 'none');
+            
+            // 標記正確和錯誤答案
+            choices[data.correct].classList.add('correct');
+            if (selectedIndex !== data.correct) {
+                choices[selectedIndex].classList.add('incorrect');
+            }
+            
+            // 顯示反饋
+            feedback.style.display = 'block';
+            if (selectedIndex === data.correct) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `<strong>✅ 正確！</strong><br>${data.explanation}`;
+                
+                // 修正計分邏輯：確保全對可得100分
+                const totalLevels = Object.keys(gameData).length;
+                const baseScore = Math.floor(100 / totalLevels);
+                const remainder = 100 - (baseScore * totalLevels);
+                
+                // 前幾關得基本分，最後幾關得基本分+餘數
+                if (currentLevel <= totalLevels - remainder) {
+                    score += baseScore;
+                } else {
+                    score += baseScore + 1;
+                }
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `<strong>❌ 錯誤！</strong><br>正確答案是：${data.choices[data.correct]}<br>${data.explanation}`;
+            }
+            
+            updateDisplay();
+            nextBtn.style.display = 'block';
+        }
+
+        function nextLevel() {
+            if (currentLevel < Object.keys(gameData).length) {
+                currentLevel++;
+                loadLevel(currentLevel);
+            } else {
+                endGame();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = currentLevel;
+        }
+
+        function updateTimeline() {
+            const items = document.querySelectorAll('.timeline-item');
+            items.forEach((item, index) => {
+                const level = index + 1;
+                item.classList.remove('active', 'completed');
+                
+                if (level < currentLevel) {
+                    item.classList.add('completed');
+                } else if (level === currentLevel) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function endGame() {
+            // 儲存本次分數
+            saveScore(score);
+            
+            document.querySelector('.game-board').style.display = 'none';
+            const gameOver = document.getElementById('gameOver');
+            gameOver.style.display = 'block';
+            
+            const gradeInfo = getGradeInfo(score);
+            
+            document.getElementById('finalScore').innerHTML = `
+                <h3>本次分數：${score}分</h3>
+                <p>評級：${gradeInfo.grade}</p>
+            `;
+            
+            // 顯示歷史成績
+            displayScoreHistory();
+        }
+
+        function displayScoreHistory() {
+            const stats = getScoreStats();
+            const scoreList = document.getElementById('scoreList');
+            
+            // 更新統計資訊
+            document.getElementById('bestScore').textContent = `最高分: ${stats.best}分`;
+            document.getElementById('averageScore').textContent = `平均分: ${stats.average}分`;
+            document.getElementById('gameCount').textContent = stats.count;
+            
+            // 顯示歷史分數列表
+            if (scoreHistory.length === 0) {
+                scoreList.innerHTML = '<p style="opacity: 0.7;">還沒有歷史記錄</p>';
+                return;
+            }
+            
+            scoreList.innerHTML = scoreHistory.map((entry, index) => {
+                const gradeInfo = getGradeInfo(entry.score);
+                const isLatest = index === 0;
+                
+                return `
+                    <div class="score-entry" style="${isLatest ? 'background: rgba(255,255,255,0.1); border-radius: 8px; padding: 12px;' : ''}">
+                        <div>
+                            <span class="score-medal">${gradeInfo.medal}</span>
+                            <span>${entry.date} ${entry.time}</span>
+                            ${isLatest ? '<span style="margin-left: 8px; font-size: 0.8rem; background: #ff6b6b; padding: 2px 6px; border-radius: 10px;">最新</span>' : ''}
+                        </div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">
+                            ${entry.score}分
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            score = 0;
+            gameStarted = false;
+            document.querySelector('.game-board').style.display = 'block';
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('game-content').innerHTML = '';
+            updateDisplay();
+            updateTimeline();
+        }
+
+        // 初始化
+        loadScoreHistory();
+        updateDisplay();
+        updateTimeline();
+    </script>
+</body>
+</html>
